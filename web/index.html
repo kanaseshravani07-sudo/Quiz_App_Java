@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizForge | Java Challenge</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --panel: #121a2d;
+  --panel2: #18233a;
+  --border: #283650;
+  --text: #edf2ff;
+  --muted: #9aa8c4;
+  --accent: #8b7cff;
+  --cyan: #52dfd0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh;
+  background: radial-gradient(ellipse at top, #18264a 0%, var(--bg) 55%);
+  color: var(--text);
+  font: 15px/1.6 "Segoe UI", Arial, sans-serif;
+}
+button { font: inherit; cursor: pointer; }
+.shell { width: min(920px, 92%); margin: auto; padding: 26px 0 45px; }
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; margin-bottom: 40px;
+}
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 21px; letter-spacing: -.5px; }
+.logo {
+  display: grid; place-items: center; width: 43px; height: 43px;
+  border-radius: 14px; color: white; font-weight: 900;
+  background: linear-gradient(135deg, #8b7cff, #4fbcdf);
+  box-shadow: 0 8px 28px #7163ff35;
+}
+.brand small { display: block; color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: 1.5px; }
+.status { border: 1px solid var(--border); border-radius: 30px; padding: 7px 12px; color: var(--muted); font-size: 12px; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); margin-right: 7px; }
+.hero { text-align: center; margin-bottom: 28px; }
+.eyebrow { color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; }
+h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.12; letter-spacing: -1.8px; margin: 10px 0 12px; }
+h1 span { color: var(--accent); }
+.hero p { color: var(--muted); margin: 0 auto; max-width: 520px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 28px 0 18px; }
+.stat { border: 1px solid var(--border); background: #111a2cbf; border-radius: 15px; padding: 14px; text-align: center; }
+.stat strong { display: block; font-size: 19px; }
+.stat small { color: var(--muted); font-size: 12px; }
+.card { border: 1px solid var(--border); background: #111a2cf2; border-radius: 22px; padding: clamp(18px, 4vw, 32px); box-shadow: 0 20px 65px #0002; }
+.topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pill { display: inline-block; background: #8b7cff1a; color: #bdb5ff; border: 1px solid #8b7cff42; border-radius: 30px; padding: 5px 11px; font-size: 12px; font-weight: 700; }
+.timer { font-variant-numeric: tabular-nums; color: var(--cyan); font-weight: 800; background: #52dfd00d; border: 1px solid #52dfd044; padding: 6px 11px; border-radius: 10px; }
+.timer.warning { color: #ff9c9c; border-color: #ff707044; }
+.progress-row { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; margin: 20px 0 8px; }
+.progress { height: 6px; background: #263149; border-radius: 10px; overflow: hidden; }
+.progress div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--cyan)); transition: width .25s ease; }
+.question { font-size: clamp(20px, 3.5vw, 27px); line-height: 1.4; margin: 25px 0 21px; }
+.options { display: grid; gap: 11px; }
+.option {
+  display: flex; align-items: center; gap: 13px; width: 100%; text-align: left;
+  border: 1px solid var(--border); border-radius: 13px; padding: 14px;
+  color: var(--text); background: #151f33; transition: .18s;
+}
+.option:hover { border-color: #8274ed; transform: translateY(-1px); }
+.option.selected { border-color: var(--accent); background: #8b7cff20; box-shadow: inset 0 0 0 1px #8b7cff30; }
+.letter { display: grid; place-items: center; flex: 0 0 34px; height: 34px; border-radius: 10px; border: 1px solid #3b4864; color: #c5cde0; font-weight: 800; }
+.selected .letter { background: var(--accent); border-color: var(--accent); color: white; }
+.option-text { flex: 1; overflow-wrap: anywhere; }
+.option .check { color: var(--cyan); font-size: 19px; }
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 25px; }
+.btn { border: 1px solid var(--border); border-radius: 12px; padding: 11px 17px; font-weight: 700; color: var(--text); background: var(--panel2); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn.primary { border: 0; background: linear-gradient(110deg, #8b7cff, #6c75ef); color: white; box-shadow: 0 7px 22px #7768ff28; }
+.btn.primary:hover { filter: brightness(1.1); }
+.note { color: var(--muted); font-size: 12px; text-align: center; margin-top: 19px; }
+.hidden { display: none !important; }
+.result { text-align: center; padding: 20px 0; }
+.result-icon { font-size: 54px; }
+.result h2 { font-size: 34px; margin: 7px 0; }
+.score { font-size: 58px; font-weight: 900; color: var(--cyan); letter-spacing: -2px; margin: 10px 0; }
+.result p { color: var(--muted); }
+.result-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 25px; }
+footer { text-align: center; color: #7785a3; font-size: 12px; margin-top: 25px; }
+footer strong { color: #b4bfd6; }
+.error { color: #ffaaaa; text-align: center; padding: 25px 10px; }
+@media(max-width:540px) {
+  .shell { padding-top: 17px; }
+  header { margin-bottom: 30px; }
+  .brand { font-size: 18px; }
+  .status { font-size: 10px; }
+  .stats { gap: 7px; }
+  .stat { padding: 10px 5px; }
+  .stat strong { font-size: 16px; }
+  .card { border-radius: 17px; }
+  .option { padding: 11px; }
+  .nav .btn { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="logo">Q</div>
+      <div>QuizForge<small>KNOWLEDGE ARENA</small></div>
+    </div>
+    <div class="status"><span class="dot"></span>LOCAL DATABASE CONNECTED</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Think. Choose. Conquer.</div>
+    <h1>Test your <span>Java</span> skills.</h1>
+    <p>Challenge your fundamentals, trust your logic, and see how much you know.</p>
+  </section>
+
+  <section class="stats" aria-label="Quiz details">
+    <div class="stat"><strong id="statQuestions">—</strong><small>Questions</small></div>
+    <div class="stat"><strong>10 min</strong><small>Time limit</small></div>
+    <div class="stat"><strong>Java + JDBC</strong><small>Topic</small></div>
+  </section>
+
+  <main class="card">
+    <div id="loading" class="error">Connecting to your SQLite question bank…</div>
+
+    <section id="quiz" class="hidden">
+      <div class="topline">
+        <span id="category" class="pill">Java Basics</span>
+        <span id="timer" class="timer">10:00</span>
+      </div>
+      <div class="progress-row">
+        <span id="questionCount">Question 1 of 3</span>
+        <span id="answeredCount">0 answered</span>
+      </div>
+      <div class="progress"><div id="progressBar"></div></div>
+
+      <h2 id="questionText" class="question"></h2>
+      <div id="options" class="options"></div>
+
+      <div class="nav">
+        <button id="prevBtn" class="btn" type="button">← Previous</button>
+        <button id="nextBtn" class="btn primary" type="button">Next question →</button>
+      </div>
+      <p class="note">Your answers are evaluated by the Java backend when you submit.</p>
+    </section>
+
+    <section id="result" class="result hidden">
+      <div class="result-icon">✦</div>
+      <div class="eyebrow">CHALLENGE COMPLETED</div>
+      <h2 id="resultTitle">Well done!</h2>
+      <div id="score" class="score">0/0</div>
+      <p id="resultMessage"></p>
+      <div class="result-actions">
+        <button id="reviewBtn" class="btn" type="button">Review answers</button>
+        <button id="restartBtn" class="btn primary" type="button">Try again ↻</button>
+      </div>
+    </section>
+
+    <div id="error" class="error hidden"></div>
+  </main>
+
+  <footer>BUILT WITH <strong>JAVA · JDBC · SQLITE</strong><br>Local-first learning. No external APIs.</footer>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const letters = ["A", "B", "C", "D"];
+
+let questions = [];
+let answers = {};
+let current = 0;
+let secondsLeft = 600;
+let timerId = null;
+let submitted = false;
+let lastScore = null;
+
+async function loadQuestions() {
+  $("loading").classList.remove("hidden");
+  $("error").classList.add("hidden");
+
+  try {
+    const response = await fetch("/api/questions", { cache: "no-store" });
+    if (!response.ok) throw new Error("Server returned HTTP " + response.status);
+
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("No questions found. Add questions to the SQLite database first.");
+    }
+
+    questions = data;
+    $("statQuestions").textContent = questions.length;
+    startQuiz();
+  } catch (error) {
+    $("loading").classList.add("hidden");
+    $("error").classList.remove("hidden");
+    $("error").textContent =
+      "Unable to load questions. Make sure the Java server is running and the database has questions. " +
+      error.message;
+  }
+}
+
+function startQuiz() {
+  clearInterval(timerId);
+  answers = {};
+  current = 0;
+  secondsLeft = 600;
+  submitted = false;
+  lastScore = null;
+
+  $("loading").classList.add("hidden");
+  $("error").classList.add("hidden");
+  $("result").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+
+  renderQuestion();
+  updateTimer();
+  timerId = setInterval(() => {
+    secondsLeft--;
+    updateTimer();
+    if (secondsLeft <= 0) {
+      clearInterval(timerId);
+      submitQuiz();
+    }
+  }, 1000);
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  $("category").textContent = q.category;
+  $("questionText").textContent = q.question;
+  $("questionCount").textContent =
+    "Question " + (current + 1) + " of " + questions.length;
+  $("answeredCount").textContent =
+    Object.keys(answers).length + " answered";
+  $("progressBar").style.width =
+    ((current + 1) / questions.length * 100) + "%";
+
+  $("options").replaceChildren();
+
+  for (const letter of letters) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "option" +
+      (answers[q.id] === letter ? " selected" : "");
+    button.setAttribute("aria-pressed",
+      answers[q.id] === letter ? "true" : "false");
+
+    const badge = document.createElement("span");
+    badge.className = "letter";
+    badge.textContent = letter;
+
+    const label = document.createElement("span");
+    label.className = "option-text";
+    label.textContent = q.options[letter];
+
+    const check = document.createElement("span");
+    check.className = "check";
+    check.textContent = answers[q.id] === letter ? "✓" : "";
+
+    button.append(badge, label, check);
+    button.addEventListener("click", () => {
+      answers[q.id] = letter;
+      renderQuestion();
+    });
+    $("options").append(button);
+  }
+
+  $("prevBtn").disabled = current === 0;
+  $("nextBtn").textContent =
+    current === questions.length - 1 ? "Submit quiz ✓" : "Next question →";
+}
+
+function updateTimer() {
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+  $("timer").textContent =
+    String(minutes).padStart(2, "0") + ":" +
+    String(seconds).padStart(2, "0");
+  $("timer").classList.toggle("warning", secondsLeft <= 60);
+}
+
+$("prevBtn").addEventListener("click", () => {
+  if (current > 0) {
+    current--;
+    renderQuestion();
+  }
+});
+
+$("nextBtn").addEventListener("click", () => {
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    submitQuiz();
+  }
+});
+
+async function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerId);
+  $("nextBtn").disabled = true;
+  $("prevBtn").disabled = true;
+
+  try {
+    const payload = questions
+      .filter(q => answers[q.id])
+      .map(q => q.id + ":" + answers[q.id])
+      .join(",");
+
+    const response = await fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain; charset=UTF-8" },
+      body: payload
+    });
+
+    if (!response.ok) throw new Error("Score request failed: HTTP " + response.status);
+
+    const result = await response.json();
+    lastScore = result;
+
+    $("quiz").classList.add("hidden");
+    $("result").classList.remove("hidden");
+    $("score").textContent = result.score + "/" + result.total;
+
+    const percent = result.total
+      ? Math.round(result.score / result.total * 100) : 0;
+
+    $("resultTitle").textContent =
+      percent === 100 ? "Perfect score!" :
+      percent >= 60 ? "Well done!" : "Keep practising!";
+    $("resultMessage").textContent =
+      percent + "% correct · " + Object.keys(answers).length +
+      " of " + questions.length + " questions answered.";
+  } catch (error) {
+    submitted = false;
+    $("quiz").classList.remove("hidden");
+    $("error").classList.remove("hidden");
+    $("error").textContent =
+      "Could not submit the quiz. Please try again. " + error.message;
+    $("nextBtn").disabled = false;
+    $("prevBtn").disabled = false;
+  }
+}
+
+$("restartBtn").addEventListener("click", startQuiz);
+
+$("reviewBtn").addEventListener("click", () => {
+  if (!lastScore) return;
+  $("result").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  current = 0;
+  renderQuestion();
+  $("nextBtn").textContent = "Back to results";
+  $("nextBtn").onclick = () => {
+    $("quiz").classList.add("hidden");
+    $("result").classList.remove("hidden");
+    $("nextBtn").onclick = null;
+  };
+});
+
+loadQuestions();
+</script>
+</body>
+</html>
